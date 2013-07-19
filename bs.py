@@ -331,6 +331,8 @@ def help():
     for d in type_map:
         print "%s:%s" % (d, type_map[d])
     print ''
+    print '### Quit'
+    print 'quit'
 
 
 def main():
