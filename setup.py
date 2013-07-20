@@ -9,7 +9,7 @@ setuptools.setup(
     author_email='zrzhit@gmail.com',
     url='http://github.com/zhurongze/bs',
     scripts=['bs.py'],
-    install_requires=['paramiko', 'oslo.config'],
+    install_requires=['paramiko', 'oslo.config', 'launchpadlib'],
     py_modules=['bs'],
     entry_points={'console_scripts': ['bs = bs:main']},
     classifiers=[
