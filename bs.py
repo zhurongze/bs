@@ -4,6 +4,8 @@ import sys
 import json
 import paramiko
 import pkg_resources
+from getpass import getpass, getuser
+from os.path import expanduser
 from oslo.config import cfg
 from launchpadlib.launchpad import Launchpad
 
@@ -17,7 +19,7 @@ bs_opts = [
                default=29418,
                help='The port of gerrit service'),
     cfg.StrOpt('gerrit_username',
-               default='',
+               default=getuser(),
                help='Username of gerrit service'),
     cfg.ListOpt('projects',
                 default=['nova',
@@ -63,8 +65,20 @@ def ssh_client(host, port, user=None, key=None):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.load_system_host_keys()
-    client.connect(host, port=port, key_filename=key, username=user)
-    return client
+    agent = paramiko.Agent()
+    keys = agent.get_keys()
+    if not keys:
+        key_file = expanduser('~/.ssh/id_rsa')
+        password = getpass('Enter passphrase for %s: ' % key_file)
+        keys = [paramiko.RSAKey.from_private_key_file(key_file, password)]
+    for pkey in keys:
+        try:
+            client.connect(host, port=port, username=user, pkey=pkey)
+            return client
+        except:
+            pass
+
+    raise Exception("ssh authentication failed.")
 
 
 def get_bugs(launchpad, project):
